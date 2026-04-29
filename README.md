@@ -1,7 +1,7 @@
 # In-Class Exercise: V-Tables in C++
 
 **Topic:** Virtual dispatch internals — vtables and vptrs  
-**File:** `starter/main.cpp`  
+**File:** `starter-code/main.cpp`  
 **Build:** `make` → `./rps`
 
 ---
