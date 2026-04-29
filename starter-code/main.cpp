@@ -1,4 +1,8 @@
 #include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <algorithm>
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
@@ -11,52 +15,60 @@
 
 class IGameObject {
 public:
-    virtual void draw() const = 0;
-    virtual int  type() const = 0;  // 0 = Rock, 1 = Paper, 2 = Scissors
+    virtual std::vector<std::string> draw() const = 0;
+    virtual int type() const = 0;  // 0 = Rock, 1 = Paper, 2 = Scissors
     virtual ~IGameObject() = default;
 };
 
 class Rock : public IGameObject {
 public:
-    void draw() const override {
-        std::cout << "    ___  \n"
-                     "   /   \\ \n"
-                     "  (     )\n"
-                     "   \\___/ \n"
-                     "   ROCK  \n";
+    std::vector<std::string> draw() const override {
+        return {
+            "    ___  ",
+            "   /   \\ ",
+            "  (     )",
+            "   \\___/ ",
+            "   ROCK  ",
+        };
     }
     int type() const override { return 0; }
 };
 
 class Paper : public IGameObject {
 public:
-    void draw() const override {
-        std::cout << "  +-------+\n"
-                     "  |       |\n"
-                     "  | PAPER |\n"
-                     "  |       |\n"
-                     "  +-------+\n";
+    std::vector<std::string> draw() const override {
+        return {
+            "  +-------+",
+            "  |       |",
+            "  | PAPER |",
+            "  |       |",
+            "  +-------+",
+        };
     }
     int type() const override { return 1; }
 };
 
 class Scissors : public IGameObject {
 public:
-    void draw() const override {
-        std::cout << "    \\ /   \n"
-                     "     X   \n"
-                     "    / \\  \n"
-                     " SCISSORS\n";
+    std::vector<std::string> draw() const override {
+        return {
+            "    \\ /   ",
+            "     X    ",
+            "    / \\   ",
+            " SCISSORS ",
+        };
     }
     int type() const override { return 2; }
 };
 
 class FunnyRock : public IGameObject {
 public:
-    void draw() const override {
-        std::cout << "  \\(^o^)/ \n"
-                     "   PARTY  \n"
-                     "   ROCK!  \n";
+    std::vector<std::string> draw() const override {
+        return {
+            "  \\(^o^)/ ",
+            "   PARTY  ",
+            "   ROCK!  ",
+        };
     }
     int type() const override { return 0; }
 };
@@ -85,6 +97,28 @@ class RockPlayer : public IPlayer {
 public:
     IGameObject* pick() override { return new Rock(); }
 };
+
+// ============================================================
+//  Display helpers
+// ============================================================
+
+static void printSideBySide(const IGameObject* left, const IGameObject* right) {
+    const int col_width = 16;
+
+    std::cout << "\n  "
+              << std::left << std::setw(col_width) << "--- You ---"
+              << "--- Rival ---\n";
+
+    auto ll = left->draw();
+    auto rl = right->draw();
+    std::size_t rows = std::max(ll.size(), rl.size());
+
+    for (std::size_t i = 0; i < rows; ++i) {
+        const std::string& lline = i < ll.size() ? ll[i] : "";
+        const std::string& rline = i < rl.size() ? rl[i] : "";
+        std::cout << "  " << std::left << std::setw(col_width) << lline << rline << "\n";
+    }
+}
 
 // ============================================================
 //  Game logic
@@ -182,10 +216,7 @@ int main() {
 
         IGameObject* rival_choice = rival.pick();
 
-        std::cout << "\n  --- You ---          --- Rival ---\n";
-        user_choice->draw();
-        std::cout << "  -------------       ---------------\n";
-        rival_choice->draw();
+        printSideBySide(user_choice, rival_choice);
         std::cout << "\n  >>> " << whoWins(user_choice, rival_choice) << "\n";
 
         delete user_choice;
