@@ -113,10 +113,12 @@ static void printSideBySide(const IGameObject* left, const IGameObject* right) {
     auto rl = right->draw();
     std::size_t rows = std::max(ll.size(), rl.size());
 
+    // Bottom-align: pad shorter drawing with empty lines at the top.
+    while (ll.size() < rows) ll.insert(ll.begin(), "");
+    while (rl.size() < rows) rl.insert(rl.begin(), "");
+
     for (std::size_t i = 0; i < rows; ++i) {
-        const std::string& lline = i < ll.size() ? ll[i] : "";
-        const std::string& rline = i < rl.size() ? rl[i] : "";
-        std::cout << "  " << std::left << std::setw(col_width) << lline << rline << "\n";
+        std::cout << "  " << std::left << std::setw(col_width) << ll[i] << rl[i] << "\n";
     }
 }
 
