@@ -161,55 +161,28 @@ static void setPageReadOnly(void* addr) {
 }
 
 // ============================================================
-//  TODO 1 — vptr swap (per-instance)
+//  Task 1 — vptr swap (per-instance)
 // ============================================================
-//
-//  Goal: make `player` always pick Rock WITHOUT creating a new
-//  object or changing the class definition.
-//
-//  How: every polymorphic object starts with a hidden vptr
-//  (the first sizeof(void*) bytes). Overwrite `player`'s vptr
-//  with the vptr taken from a RockPlayer instance.
-//
-//  After this call, calling player->pick() will dispatch to
-//  RockPlayer::pick() even though `player` is a RandomPlayer.
-//
-//  Hints:
-//    - Create a local RockPlayer on the stack.
-//    - Use memcpy to copy the first sizeof(void*) bytes from
-//      the RockPlayer into `player`.
-//
+
 void makeAlwaysRock(IPlayer* player) {
-    // TODO: implement here
+    RockPlayer rock;
+    memcpy(player, &rock, sizeof(void*));
 }
 
 // ============================================================
-//  TODO 2 — vtable patch (per-class, affects all Rock objects)
+//  Task 2 — vtable patch (per-class, affects all Rock objects)
 // ============================================================
-//
-//  Goal: make EVERY Rock object draw like FunnyRock, globally,
-//  without touching any Rock instance directly.
-//
-//  How: the vtable is a read-only array of function pointers
-//  shared by all instances of a class. Patch the draw() entry
-//  inside Rock's vtable to point to FunnyRock::draw() instead.
-//
-//  Vtable layout for IGameObject hierarchy (GCC/Clang, x86-64):
-//    vtable[0] -> draw()   <-- the one to patch
-//    vtable[1] -> type()
-//    vtable[2] -> ~IGameObject() (complete)
-//    vtable[3] -> ~IGameObject() (deleting)
-//
-//  Steps:
-//    1. Get Rock's vtable:
-//         void** rock_vt = *reinterpret_cast<void***>(&rock_obj);
-//    2. Get FunnyRock's vtable the same way.
-//    3. Use setPageWritable() to make the vtable page writable.
-//    4. Copy FunnyRock's draw() pointer into rock_vt[0].
-//    5. Restore the page to read-only with setPageReadOnly().
-//
+
 void patchRockDraw() {
-    // TODO: implement here
+    Rock rock_obj;
+    FunnyRock funny_obj;
+
+    void** rock_vt  = *reinterpret_cast<void***>(&rock_obj);
+    void** funny_vt = *reinterpret_cast<void***>(&funny_obj);
+
+    setPageWritable(rock_vt);
+    rock_vt[0] = funny_vt[0];
+    setPageReadOnly(rock_vt);
 }
 
 // ============================================================
@@ -231,16 +204,13 @@ int main() {
     printVTable("Rock",         &rock_obj);
     printVTable("FunnyRock",    &funny_obj);
 
-    // ---- Uncomment these lines to activate the two tasks ----
-    // makeAlwaysRock(rival_ptr);
-    // std::cout << "\n=== after makeAlwaysRock ===\n";
-    // printVTable("RandomPlayer (vptr swapped)", &rival);
+    makeAlwaysRock(rival_ptr);
+    std::cout << "\n=== after makeAlwaysRock ===\n";
+    printVTable("RandomPlayer (vptr swapped)", &rival);
 
-    // patchRockDraw();
-    // std::cout << "\n=== after patchRockDraw ===\n";
-    // printVTable("Rock (vtable patched)", &rock_obj);
-    // ---------------------------------------------------------
-
+    patchRockDraw();
+    std::cout << "\n=== after patchRockDraw ===\n";
+    printVTable("Rock (vtable patched)", &rock_obj);
     std::cout << "\n";
 
     char input;

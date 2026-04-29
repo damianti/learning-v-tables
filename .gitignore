@@ -1,5 +1,6 @@
 .DS_Store
 *.dSYM/
-implementation/
+solution/rps
+solution/rps.dSYM/
 starter-code/rps
 notes-devirtualization.md
