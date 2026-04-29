@@ -197,10 +197,11 @@ int main() {
     srand(static_cast<unsigned>(time(nullptr)));
 
     RandomPlayer rival;
+    IPlayer* rival_ptr = &rival;
 
     // ---- Uncomment these lines to activate the two tasks ----
-    // makeAlwaysRock(&rival);   // Task 1: rival always picks Rock
-    // patchRockDraw();          // Task 2: all Rocks draw as FunnyRock
+    // makeAlwaysRock(rival_ptr);   // Task 1: rival always picks Rock
+    // patchRockDraw();              // Task 2: all Rocks draw as FunnyRock
     // ---------------------------------------------------------
 
     char input;
@@ -216,7 +217,7 @@ int main() {
         else if (input == 's') user_choice = new Scissors();
         else { std::cout << "Unknown input, try again.\n"; continue; }
 
-        IGameObject* rival_choice = rival.pick();
+        IGameObject* rival_choice = rival_ptr->pick();
 
         printSideBySide(user_choice, rival_choice);
         std::cout << "\n  >>> " << whoWins(user_choice, rival_choice) << "\n";
